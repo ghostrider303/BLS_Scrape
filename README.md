@@ -58,6 +58,29 @@ def add_lagged_columns(df, columns, lag_months=[1, 2, 3]):
 # Assuming df is the dataframe generated in the previous step
 
 lagged_df = add_lagged_columns(df, ['Ford_marketshare', 'Nissan_marketshare', 'Toyota_marketshare'])
+
+def calculate_correlation(df, city, market_columns, google_columns, lag_months=[1, 2, 3]):
+    city_df = df[df['City'] == city]
+    correlations = {}
+    for market_col in market_columns:
+        for google_col in google_columns:
+            for lag in lag_months:
+                market_lag_col = f'{market_col}_lag{lag}'
+                correlation = city_df[[market_lag_col, google_col]].corr().iloc[0, 1]
+                key = f'{market_col}_lag{lag} vs {google_col}'
+                correlations[key] = correlation
+    return correlations
+
+# Test the function
+city = 'CityA'
+market_columns = ['Ford_marketshare', 'Nissan_marketshare', 'Toyota_marketshare']
+google_columns = ['Normalised_Ford_google_search_data', 'Normalised_Nissan_google_search_data', 'Normalised_Toyota_google_search_data']
+
+correlation_results = calculate_correlation(lagged_df, city, market_columns, google_columns)
+for key, value in correlation_results.items():
+    print(f'{city}: {key} - Correlation: {value}')
+    
+    
 cities = df['City'].unique()
 
 for city in cities:
@@ -66,3 +89,4 @@ for city in cities:
     for key, value in correlation_results.items():
         print(f'{key} - Correlation: {value}')
     print()
+
